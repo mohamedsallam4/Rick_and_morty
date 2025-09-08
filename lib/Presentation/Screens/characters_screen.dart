@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rickandmorty/BussnissLogic/cubit/characters_cubit.dart';
 import 'package:rickandmorty/Constants/my_colors.dart';
-import 'package:rickandmorty/Data/Models/characters.dart';
+import 'package:rickandmorty/Data/Models/singel_char_model.dart';
 import 'package:rickandmorty/Presentation/Widgets/charater_item.dart';
 
 class CharactersScreen extends StatefulWidget {
@@ -17,14 +17,22 @@ class _CharactersScreenState extends State<CharactersScreen> {
   late List<Result> searchedForCharacters;
   bool isSearching = false;
   final searchTextController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<CharactersCubit>(context).getAllCharacters();
+  }
+
+  /// TextField الخاص بالبحث
   Widget buildSearchField() {
     return TextField(
       controller: searchTextController,
       cursorColor: MyColors.myGrey,
-      decoration: InputDecoration(
-        hintText: "Find a character",
+      decoration: const InputDecoration(
+        hintText: "Find a character...",
         border: InputBorder.none,
-        hintStyle: TextStyle(color: MyColors.myGrey, fontSize: 18),
+        hintStyle: TextStyle(color: Colors.grey, fontSize: 18),
       ),
       style: TextStyle(color: MyColors.myGrey, fontSize: 18),
       onChanged: (searchedCharacter) {
@@ -33,17 +41,20 @@ class _CharactersScreenState extends State<CharactersScreen> {
     );
   }
 
+  /// فلترة النتائج
   void addSearchedForItemsToSearchedList(String searchedCharacter) {
     searchedForCharacters = allCharacters
         .where(
-          (character) =>
-              character.name!.toLowerCase().startsWith(searchedCharacter),
+          (character) => character.name!
+              .toLowerCase()
+              .contains(searchedCharacter.toLowerCase()),
         )
         .toList();
     setState(() {});
   }
 
-  List<Widget> buildAppBarAction() {
+  /// أزرار الـ AppBar
+  List<Widget> buildAppBarActions() {
     if (isSearching) {
       return [
         IconButton(
@@ -66,15 +77,16 @@ class _CharactersScreenState extends State<CharactersScreen> {
     }
   }
 
+  /// بدأ البحث
   void startSearch() {
-    ModalRoute.of(
-      context,
-    )!.addLocalHistoryEntry(LocalHistoryEntry(onRemove: stopSearching));
+    ModalRoute.of(context)!
+        .addLocalHistoryEntry(LocalHistoryEntry(onRemove: stopSearching));
     setState(() {
       isSearching = true;
     });
   }
 
+  /// إيقاف البحث
   void stopSearching() {
     clearSearch();
     setState(() {
@@ -82,23 +94,19 @@ class _CharactersScreenState extends State<CharactersScreen> {
     });
   }
 
+  /// مسح البحث
   void clearSearch() {
     setState(() {
       searchTextController.clear();
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    BlocProvider.of<CharactersCubit>(context).getAllCharacters();
-  }
-
+  /// Bloc Builder
   Widget buildBlocWidget() {
     return BlocBuilder<CharactersCubit, CharactersState>(
       builder: (context, state) {
         if (state is CharactersLoaded) {
-          allCharacters = (state).characters;
+          allCharacters = state.characters;
           return buildLoadedListWidgets();
         } else {
           return showLoadingIndicator();
@@ -107,22 +115,31 @@ class _CharactersScreenState extends State<CharactersScreen> {
     );
   }
 
-
-
+  /// Loader
   Widget showLoadingIndicator() {
-    return Center(child: CircularProgressIndicator(color: MyColors.myYellow));
+    return Center(
+      child: CircularProgressIndicator(color: MyColors.myYellow),
+    );
   }
 
+  /// الـ Widgets بعد التحميل
   Widget buildLoadedListWidgets() {
     return SingleChildScrollView(
       child: Container(
         color: MyColors.myGrey,
-        child: Column(children: [buildCharactersList()]),
+        child: Column(
+          children: [buildCharactersList()],
+        ),
       ),
     );
   }
 
+  /// GridView للشخصيات
   Widget buildCharactersList() {
+    final listToShow = searchTextController.text.isEmpty
+        ? allCharacters
+        : searchedForCharacters;
+
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -131,34 +148,30 @@ class _CharactersScreenState extends State<CharactersScreen> {
         mainAxisSpacing: 1,
       ),
       shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.zero,
-      itemCount: searchTextController.text.isEmpty?   allCharacters.length:searchedForCharacters.length,
+      itemCount: listToShow.length,
       itemBuilder: (BuildContext context, int index) {
-        return CharacterItem(character:searchTextController.text.isEmpty? allCharacters[index]:searchedForCharacters[index]);
+        return CharacterItem(character: listToShow[index]);
       },
     );
   }
-Widget buildAppBarTitle(){
-  return Text("Characters", style: TextStyle(color: MyColors.myGrey));
-}
 
-
+  /// عنوان الـ AppBar
+  Widget buildAppBarTitle() {
+    return Text("Characters", style: TextStyle(color: MyColors.myGrey));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
-
-
         backgroundColor: MyColors.myYellow,
-        title:  isSearching ? buildSearchField() : buildAppBarTitle(),
-
-actions: buildAppBarAction(),
-leading:  isSearching ? BackButton(color: MyColors.myGrey  ,):Container(),
-
-
+        title: isSearching ? buildSearchField() : buildAppBarTitle(),
+        actions: buildAppBarActions(),
+        leading: isSearching
+            ? BackButton(color: MyColors.myGrey)
+            : const SizedBox.shrink(),
       ),
       body: buildBlocWidget(),
     );

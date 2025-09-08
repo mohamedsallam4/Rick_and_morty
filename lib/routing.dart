@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rickandmorty/BussnissLogic/cubit/characters_cubit.dart';
 import 'package:rickandmorty/Constants/strings.dart';
-import 'package:rickandmorty/Data/Models/characters.dart';
+import 'package:rickandmorty/Data/Models/singel_char_model.dart';
 import 'package:rickandmorty/Data/Repository/characters_repository.dart';
 import 'package:rickandmorty/Data/Web_Servise/characters_web_services.dart';
 import 'package:rickandmorty/Presentation/Screens/characters_details_screen.dart';
