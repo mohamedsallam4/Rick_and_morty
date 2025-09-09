@@ -1,5 +1,5 @@
-import 'package:rickandmorty/Data/Models/characters.dart';
-import 'package:rickandmorty/Data/Web_Servise/characters_web_services.dart';
+import '../Models/characters.dart';
+import '../Web_Servise/characters_web_services.dart';
 
 class CharactersRepository {
   final CharactersWebServices charactersWebServices;

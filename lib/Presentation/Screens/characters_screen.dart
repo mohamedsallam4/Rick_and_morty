@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rickandmorty/BussnissLogic/cubit/characters_cubit.dart';
-import 'package:rickandmorty/Constants/my_colors.dart';
-import 'package:rickandmorty/Data/Models/singel_char_model.dart';
-import 'package:rickandmorty/Presentation/Widgets/charater_item.dart';
+import 'package:flutter_offline/flutter_offline.dart';
+import '../../BussnissLogic/cubit/characters_cubit.dart';
+import '../../Constants/my_colors.dart';
+import '../../Data/Models/singel_char_model.dart';
+import '../Widgets/charater_item.dart';
 
 class CharactersScreen extends StatefulWidget {
   const CharactersScreen({super.key});
@@ -45,9 +46,9 @@ class _CharactersScreenState extends State<CharactersScreen> {
   void addSearchedForItemsToSearchedList(String searchedCharacter) {
     searchedForCharacters = allCharacters
         .where(
-          (character) => character.name!
-              .toLowerCase()
-              .contains(searchedCharacter.toLowerCase()),
+          (character) => character.name!.toLowerCase().contains(
+            searchedCharacter.toLowerCase(),
+          ),
         )
         .toList();
     setState(() {});
@@ -79,8 +80,9 @@ class _CharactersScreenState extends State<CharactersScreen> {
 
   /// بدأ البحث
   void startSearch() {
-    ModalRoute.of(context)!
-        .addLocalHistoryEntry(LocalHistoryEntry(onRemove: stopSearching));
+    ModalRoute.of(
+      context,
+    )!.addLocalHistoryEntry(LocalHistoryEntry(onRemove: stopSearching));
     setState(() {
       isSearching = true;
     });
@@ -117,9 +119,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
 
   /// Loader
   Widget showLoadingIndicator() {
-    return Center(
-      child: CircularProgressIndicator(color: MyColors.myYellow),
-    );
+    return Center(child: CircularProgressIndicator(color: MyColors.myYellow));
   }
 
   /// الـ Widgets بعد التحميل
@@ -127,9 +127,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
     return SingleChildScrollView(
       child: Container(
         color: MyColors.myGrey,
-        child: Column(
-          children: [buildCharactersList()],
-        ),
+        child: Column(children: [buildCharactersList()]),
       ),
     );
   }
@@ -162,6 +160,27 @@ class _CharactersScreenState extends State<CharactersScreen> {
     return Text("Characters", style: TextStyle(color: MyColors.myGrey));
   }
 
+  Widget buildNoInternetWidget() {
+    return Center(
+      child: Container(
+        color: const Color.fromARGB(255, 222, 214, 163),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 20),
+            Text(
+              "Can't Connect ... check internet",
+              style: TextStyle(fontSize: 22, color: MyColors.myGrey),
+            ),SizedBox(
+              height: 10,
+            ),
+            Image.asset("assets/icons/placeholder.gif"),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,7 +192,24 @@ class _CharactersScreenState extends State<CharactersScreen> {
             ? BackButton(color: MyColors.myGrey)
             : const SizedBox.shrink(),
       ),
-      body: buildBlocWidget(),
+      body: OfflineBuilder(
+        connectivityBuilder:
+            (
+              BuildContext context,
+              List<ConnectivityResult> connectivity,
+              Widget child,
+            ) {
+              final bool connected = !connectivity.contains(
+                ConnectivityResult.none,
+              );
+              if (connected) {
+                return buildBlocWidget();
+              } else {
+                return buildNoInternetWidget();
+              }
+            },
+        child: showLoadingIndicator(),
+      ),
     );
   }
 }

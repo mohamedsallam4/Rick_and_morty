@@ -1,7 +1,7 @@
  
 
-import 'package:rickandmorty/Data/Models/char_info_model.dart';
-import 'package:rickandmorty/Data/Models/singel_char_model.dart';
+import 'char_info_model.dart';
+import 'singel_char_model.dart';
 
 class Character {
     Character({

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rickandmorty/Constants/my_colors.dart';
-import 'package:rickandmorty/Constants/strings.dart';
-import 'package:rickandmorty/Data/Models/singel_char_model.dart';
+import '../../Constants/my_colors.dart';
+import '../../Constants/strings.dart';
+import '../../Data/Models/singel_char_model.dart';
 
 class CharacterItem extends StatelessWidget {
   final Result character;

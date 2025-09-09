@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rickandmorty/Constants/my_colors.dart';
-import 'package:rickandmorty/Data/Models/singel_char_model.dart';
+import '../../Constants/my_colors.dart';
+import '../../Data/Models/singel_char_model.dart';
 
 class CharactersDetailsScreen extends StatefulWidget {
   final Result selectedCharacter;
